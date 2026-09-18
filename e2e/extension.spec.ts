@@ -95,16 +95,18 @@ test('real download appears in list, delete asks confirmation — zero external 
   const root = page.locator('.td-root');
   await expect(root).toBeVisible();
 
-  // the downloaded file shows up in the list
-  const row = page.locator('.td-item', { hasText: 'sample.txt' }).first();
+  // NOTE: under Playwright, CDP's Browser.setDownloadBehavior (allowAndName) renames
+  // the downloaded file to a GUID — that is a test-harness artifact, not an extension
+  // bug. So we assert "one completed download row appeared", not the literal filename.
+  const row = page.locator('.td-item').first();
   await expect(row).toBeVisible({ timeout: 10000 });
-  await expect(row.locator('.td-name')).toHaveText('sample.txt');
+  await expect(row.locator('.td-meta')).toContainText('Done');
 
   // delete asks for confirmation, then removes the row
   await row.locator('.td-act[title="Delete"]').click();
   await expect(page.locator('#modal')).toBeVisible();
   await page.locator('#modal-ok').click();
-  await expect(page.locator('.td-item', { hasText: 'sample.txt' })).toHaveCount(0);
+  await expect(page.locator('.td-item')).toHaveCount(0);
 
   expect(external).toEqual([]);
   await context.close();
