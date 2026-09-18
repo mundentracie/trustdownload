@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>TrustDownload</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div id="app" class="td-root" data-theme="light">
+    <header class="td-header">
+      <span class="td-logo">TrustDownload</span>
+      <span class="td-spacer"></span>
+      <button id="btn-theme" class="td-btn td-icon-btn" title="Theme: auto / light / dark" aria-label="Toggle theme">Auto</button>
+      <button id="btn-clear" class="td-btn td-danger-btn" title="Erase all download history">Clear all</button>
+    </header>
+
+    <nav class="td-filters" id="filters" role="tablist" aria-label="Filter downloads">
+      <button class="td-chip" data-filter="all" aria-selected="true">All</button>
+      <button class="td-chip" data-filter="active" aria-selected="false">Active</button>
+      <button class="td-chip" data-filter="done" aria-selected="false">Done</button>
+      <button class="td-chip" data-filter="failed" aria-selected="false">Failed</button>
+    </nav>
+
+    <main id="list" class="td-list" aria-live="polite"></main>
+
+    <div id="empty" class="td-empty" hidden>
+      <div class="td-empty-icon">⇣</div>
+      <div class="td-empty-title">No downloads here</div>
+      <div class="td-empty-sub">New downloads will appear in this list.</div>
+    </div>
+
+    <div id="modal" class="td-modal" hidden role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="td-modal-card">
+        <div id="modal-title" class="td-modal-title">Are you sure?</div>
+        <div id="modal-body" class="td-modal-body"></div>
+        <div class="td-modal-actions">
+          <button id="modal-cancel" class="td-btn">Cancel</button>
+          <button id="modal-ok" class="td-btn td-danger-btn">Erase</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

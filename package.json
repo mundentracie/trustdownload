@@ -1,0 +1,17 @@
+{
+  "name": "trustdownload",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Privacy-first, open-source download manager. No ads, no tracking, zero network requests.",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "verify": "node scripts/verify.mjs",
+    "icon": "node scripts/make-icon.mjs",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "esbuild": "^0.24.0"
+  }
+}

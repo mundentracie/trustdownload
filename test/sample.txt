@@ -1,0 +1,2 @@
+TrustDownload e2e sample file.
+Zero network, local only.
