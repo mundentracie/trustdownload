@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "TrustDownload — Lightweight Download Manager",
   "version": "0.1.0",
-  "description": "Privacy-first, open-source download manager. No ads, no tracking, zero network requests. Lightweight list, accurate badge, safe delete, dark mode.",
+  "description": "Privacy-first, open-source download manager. No ads, no tracking, zero network requests. Lightweight, accurate badge, dark mode.",
   "homepage_url": "https://github.com/mundentracie/trustdownload",
   "icons": {
     "128": "icons/icon128.png"
