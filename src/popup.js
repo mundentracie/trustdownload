@@ -108,6 +108,27 @@ function icon(name) {
   return svg;
 }
 
+const ERROR_LABELS = {
+  USER_CANCELED: 'Canceled by you',
+  USER_SHUTDOWN: 'Stopped (browser closed)',
+  NETWORK_FAILED: 'Network error',
+  NETWORK_TIMEOUT: 'Network timeout',
+  NETWORK_INVALID_REQUEST: 'Invalid request',
+  SERVER_FAILED: 'Server error',
+  SERVER_FORBIDDEN: 'Server refused (403)',
+  SERVER_UNAUTHORIZED: 'Authorization required (401)',
+  SERVER_BAD_CONTENT: 'File not found on server (404)',
+  FILE_FAILED: 'Could not save file',
+  FILE_ACCESS_DENIED: 'Access denied',
+  FILE_NO_SPACE: 'Not enough disk space',
+  FILE_NAME_TOO_LONG: 'File name too long',
+  CRASH: 'Download crashed',
+};
+
+function lowerFirstError(e) {
+  return String(e).toLowerCase().replace(/_/g, ' ');
+}
+
 function act(label, cls, onClick) {
   const b = document.createElement('button');
   b.className = `td-act ${cls || ''}`;
@@ -125,7 +146,7 @@ function stateLabel(item) {
     return pct === null ? 'Downloading…' : `Downloading ${pct}%`;
   }
   if (bucket === 'done') return 'Done';
-  if (bucket === 'failed') return `Failed${item.error ? `: ${item.error}` : ''}`;
+  if (bucket === 'failed') return `Failed${item.error ? `: ${ERROR_LABELS[item.error] || lowerFirstError(item.error)}` : ''}`;
   if (bucket === 'stopped') return 'Paused / stopped';
   return item.state;
 }
