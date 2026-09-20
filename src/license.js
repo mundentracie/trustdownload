@@ -28,9 +28,9 @@ export async function verifyLicense(keyText) {
     if (dot <= 0 || dot === key.length - 1) return null;
     const idPart = key.slice(0, dot);
     const sigPart = key.slice(dot + 1);
-    if (!idPart.startsWith('TDPRO-')) return null;
-
     const idBytes = b64urlToBytes(idPart);
+    const idText = new TextDecoder().decode(idBytes);
+    if (!idText.startsWith('TDPRO-')) return null;
     const sigBytes = b64urlToBytes(sigPart);
     const rawPub = b64urlToBytes(PUBLIC_KEY_RAW_B64);
 
