@@ -178,13 +178,17 @@ html, body {
   border: none;
   background: transparent;
   color: var(--fg-dim);
-  width: 26px;
-  height: 26px;
-  border-radius: 5px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 13px;
-  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
 }
+.td-act svg { width: 16px; height: 16px; display: block; }
 .td-act:hover { background: var(--accent-soft); color: var(--accent); }
 .td-act.danger:hover { background: var(--danger-soft); color: var(--danger); }
 

@@ -79,10 +79,39 @@ function chip(name) {
   return el;
 }
 
+const ICONS = {
+  open: [['path', { d: 'M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6' }], ['polyline', { points: '15 3 21 3 21 9' }], ['line', { x1: '10', y1: '14', x2: '21', y2: '3' }]],
+  folder: [['path', { d: 'M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z' }]],
+  trash: [['polyline', { points: '3 6 5 6 21 6' }], ['path', { d: 'M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2' }]],
+  pause: [['rect', { x: '6', y: '4', width: '4', height: '16' }], ['rect', { x: '14', y: '4', width: '4', height: '16' }]],
+  play: [['polygon', { points: '5 3 19 12 5 21 5 3' }]],
+  retry: [['polyline', { points: '1 4 1 10 7 10' }], ['path', { d: 'M3.51 15a9 9 0 1 0 2.13-9.36L1 10' }]],
+  x: [['line', { x1: '18', y1: '6', x2: '6', y2: '18' }], ['line', { x1: '6', y1: '6', x2: '18', y2: '18' }]],
+};
+const SVG_NS = 'http://www.w3.org/2000/svg';
+const ICON_FOR_LABEL = { Open: 'open', 'Show in folder': 'folder', Delete: 'trash', Pause: 'pause', Resume: 'play', Cancel: 'x', Retry: 'retry' };
+
+function icon(name) {
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('stroke', 'currentColor');
+  svg.setAttribute('stroke-width', '2');
+  svg.setAttribute('stroke-linecap', 'round');
+  svg.setAttribute('stroke-linejoin', 'round');
+  svg.setAttribute('aria-hidden', 'true');
+  for (const [tag, attrs] of ICONS[name]) {
+    const el = document.createElementNS(SVG_NS, tag);
+    for (const k in attrs) el.setAttribute(k, attrs[k]);
+    svg.appendChild(el);
+  }
+  return svg;
+}
+
 function act(label, cls, onClick) {
   const b = document.createElement('button');
   b.className = `td-act ${cls || ''}`;
-  b.textContent = label;
+  b.appendChild(icon(ICON_FOR_LABEL[label] || 'open'));
   b.title = label;
   b.setAttribute('aria-label', label);
   b.addEventListener('click', onClick);
