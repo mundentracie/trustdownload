@@ -10,9 +10,56 @@
     <header class="td-header">
       <span class="td-logo">TrustDownload</span>
       <span class="td-spacer"></span>
+      <button id="btn-settings" class="td-btn td-icon-btn" title="Settings &amp; Pro" aria-label="Settings and Pro">⚙</button>
       <button id="btn-theme" class="td-btn td-icon-btn" title="Theme: auto / light / dark" aria-label="Toggle theme">Auto</button>
       <button id="btn-clear" class="td-btn td-danger-btn" title="Erase all download history">Clear all</button>
     </header>
+
+    <section id="settings" class="td-settings" hidden aria-label="Settings">
+      <div class="td-set-row td-set-title">
+        <button id="btn-back" class="td-btn" title="Back to downloads">← Back</button>
+        <span class="td-spacer"></span>
+        <span id="pro-badge" class="td-pro-badge" data-pro="false">Free</span>
+      </div>
+
+      <div class="td-set-card">
+        <div class="td-set-heading">TrustDownload Pro</div>
+        <p class="td-set-sub">Unlock auto-organize: sort finished downloads into folders by type and/or date, right inside your Downloads directory. One-time payment, offline license, no account.</p>
+        <div class="td-set-row">
+          <input id="license-input" class="td-input" type="text" placeholder="TDPRO-XXXX.XXXXXXXX" spellcheck="false" autocomplete="off" />
+          <button id="btn-activate" class="td-btn">Activate</button>
+        </div>
+        <div id="pro-msg" class="td-set-msg" hidden></div>
+      </div>
+
+      <div class="td-set-card">
+        <div class="td-set-heading">Auto-organize downloads</div>
+        <label class="td-set-row td-set-toggle">
+          <input id="org-enabled" type="checkbox" />
+          <span>Move downloads into folders automatically</span>
+        </label>
+        <label class="td-set-row">
+          <span class="td-set-label">Sort by</span>
+          <select id="org-mode" class="td-input">
+            <option value="type">File type</option>
+            <option value="date">Date</option>
+            <option value="type+date">Type + date</option>
+          </select>
+        </label>
+        <label class="td-set-row" id="row-datefmt">
+          <span class="td-set-label">Date folder</span>
+          <select id="org-datefmt" class="td-input">
+            <option value="month">Monthly (2026-09)</option>
+            <option value="day">Daily (2026-09-20)</option>
+          </select>
+        </label>
+        <div id="folder-list"></div>
+        <div class="td-set-row">
+          <button id="btn-save-settings" class="td-btn">Save rules</button>
+        </div>
+        <p class="td-set-sub">Files are named exactly as the browser chose them — only the destination folder changes. Nothing is moved after the fact, and no data is read or sent.</p>
+      </div>
+    </section>
 
     <nav class="td-filters" id="filters" role="tablist" aria-label="Filter downloads">
       <button class="td-chip" data-filter="all" aria-selected="true">All</button>

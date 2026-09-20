@@ -2,9 +2,17 @@
 // ZERO-NETWORK RULE: no fetch/XHR/WebSocket/sendBeacon/importScripts, ever.
 // Event-driven only: no alarms, no polling, no timers. Every badge update is
 // computed from a FRESH chrome.downloads.search() so the count can never drift.
-import { badgeCount } from './lib.js';
+import { badgeCount, fileNameOf, proSubdir } from './lib.js';
 
-const DEFAULTS = { theme: 'auto', shelf: false, filter: 'all' };
+const DEFAULTS = {
+  theme: 'auto',
+  shelf: false,
+  filter: 'all',
+  pro: false,
+  organize: 'off',
+  dateFormat: 'month',
+  folders: {},
+};
 
 async function getPrefs() {
   try {
@@ -77,4 +85,43 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     sendResponse({ ok: true });
   }
   return undefined;
+});
+
+/* ---------- TrustDownload Pro: auto-organize on download start ---------- */
+// Registers ONE onDeterminingFilename listener (Chrome allows max one per extension).
+// When rules are off/unlocked-absent we pass the suggestion through untouched, so
+// behavior is byte-identical to not having the listener at all.
+// ZERO-NETWORK RULE: the subdirectory comes from local rules; nothing is fetched.
+
+async function rulesFor(item) {
+  try {
+    const stored = await chrome.storage.local.get(['pro', 'organize', 'dateFormat', 'folders']);
+    if (!stored.pro) return null;
+    return {
+      organize: stored.organize || 'off',
+      dateFormat: stored.dateFormat || 'month',
+      folders: stored.folders || {},
+    };
+  } catch {
+    return null;
+  }
+}
+
+chrome.downloads.onDeterminingFilename.addListener((item, suggest) => {
+  rulesFor(item)
+    .then((rules) => {
+      if (!rules) {
+        suggest(); // accept default path unchanged
+        return;
+      }
+      const subdir = proSubdir(item, rules);
+      if (!subdir) {
+        suggest(); // no rule matched — keep default location
+        return;
+      }
+      const name = fileNameOf(item.filename);
+      suggest({ filename: `${subdir}/${name}`, conflictAction: 'uniquify' });
+    })
+    .catch(() => suggest()); // never block a download because of an extension error
+  return true; // suggest is called asynchronously
 });

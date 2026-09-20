@@ -77,3 +77,58 @@ export function assertNoHtml(str) {
   }
   return String(str);
 }
+
+/* ---------- TrustDownload Pro: auto-organize rules engine (pure logic) ---------- */
+
+/** Default destination folder names, editable by the user in Settings. */
+export const DEFAULT_FOLDERS = Object.freeze({
+  image: 'Images',
+  video: 'Video',
+  audio: 'Audio',
+  doc: 'Documents',
+  archive: 'Archives',
+  other: 'Other',
+});
+
+/** Sanitize a user-provided folder name to a safe single path segment. */
+export function safeSegment(name) {
+  const s = String(name || '')
+    .replace(/[\\/:*?"<>|]/g, '')
+    .replace(/\.\.+/g, '')
+    .trim();
+  return s.slice(0, 60);
+}
+
+/** "2026-09" (month) or "2026-09-20" (day) from an ISO start time. */
+export function dateSegment(isoString, granularity) {
+  if (!isoString) return null;
+  const day = String(isoString).slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return null;
+  return granularity === 'day' ? day : day.slice(0, 7);
+}
+
+/**
+ * Destination subdirectory (relative to Downloads, no leading/trailing slash)
+ * for a download under the given rules — or null to keep the default location.
+ * rules: { organize: 'off'|'type'|'date'|'type+date', dateFormat: 'month'|'day', folders: {...} }
+ * downloadItem: { filename, startTime } (the onDeterminingFilename shape).
+ */
+export function proSubdir(downloadItem, rules) {
+  if (!rules || rules.organize === undefined || rules.organize === 'off' || rules.organize === false) return null;
+  if (!downloadItem || !downloadItem.filename) return null;
+  const name = fileNameOf(downloadItem.filename);
+  const folders = { ...DEFAULT_FOLDERS, ...(rules.folders || {}) };
+  const cat = categoryOf(name);
+
+  const parts = [];
+  if (rules.organize === 'type' || rules.organize === 'type+date') {
+    const seg = safeSegment(folders[cat] || folders.other);
+    if (seg) parts.push(seg);
+  }
+  if (rules.organize === 'date' || rules.organize === 'type+date') {
+    const seg = dateSegment(downloadItem.startTime, rules.dateFormat);
+    if (seg) parts.push(seg);
+  }
+  if (parts.length === 0) return null;
+  return parts.filter(Boolean).join('/');
+}

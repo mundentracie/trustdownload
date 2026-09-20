@@ -48,7 +48,7 @@ check('manifest: background is our service worker, popup wired', () => {
   eq(manifest.action?.default_popup, 'src/popup.html');
 });
 
-for (const file of ['src/background.js', 'src/popup.js', 'src/lib.js', 'src/popup.html', 'src/popup.css']) {
+for (const file of ['src/background.js', 'src/popup.js', 'src/lib.js', 'src/license.js', 'src/popup.html', 'src/popup.css']) {
   check(`zero-network audit: ${file}`, () => {
     const src = readFileSync(file, 'utf8').replace(/\/\/[^\n]*/g, '').replace(/\/\*[\s\S]*?\*\//g, '');
     for (const bad of ['fetch(', 'XMLHttpRequest', 'WebSocket', 'sendBeacon', 'importScripts', 'eval(', 'new Function', 'innerHTML', 'https://', 'http://']) {
@@ -135,6 +135,62 @@ check('percentOf clamps', () => {
 check('dayKey', () => {
   eq(lib.dayKey('2026-09-18T01:02:03.000Z'), '2026-09-18');
   eq(lib.dayKey(undefined), 'unknown');
+});
+
+/* ---------- 3. unit tests: Pro rules engine (pure) ---------- */
+
+check('safeSegment strips path tricks', () => {
+  eq(lib.safeSegment('  Images '), 'Images');
+  eq(lib.safeSegment('a/b\\c:d'), 'abcd');
+  eq(lib.safeSegment('../etc'), 'etc');
+  eq(lib.safeSegment(''), '');
+  eq(lib.safeSegment('x'.repeat(100)), 'x'.repeat(60));
+});
+
+check('dateSegment month/day', () => {
+  eq(lib.dateSegment('2026-09-20T10:00:00.000Z', 'month'), '2026-09');
+  eq(lib.dateSegment('2026-09-20T10:00:00.000Z', 'day'), '2026-09-20');
+  eq(lib.dateSegment(undefined, 'month'), null);
+  eq(lib.dateSegment('garbage', 'day'), null);
+});
+
+check('proSubdir: off / no-pro / no-match', () => {
+  const item = { filename: '/Downloads/photo.jpg', startTime: '2026-09-20T10:00:00.000Z' };
+  eq(lib.proSubdir(item, { organize: 'off' }), null);
+  eq(lib.proSubdir(item, {}), null);
+  eq(lib.proSubdir(item, { organize: false }), null);
+  eq(lib.proSubdir(null, { organize: 'type' }), null);
+  eq(lib.proSubdir({ filename: '/Downloads/x' }, { organize: 'date', dateFormat: 'month', folders: {} }), null);
+});
+
+check('proSubdir: by type uses editable folders', () => {
+  const item = { filename: 'C:\\DL\\report.pdf', startTime: '2026-09-20T10:00:00.000Z' };
+  eq(lib.proSubdir(item, { organize: 'type', folders: {} }), 'Documents');
+  eq(
+    lib.proSubdir(item, { organize: 'type', folders: { doc: 'Work Docs' } }),
+    'Work Docs',
+  );
+  eq(lib.proSubdir({ filename: 'x.unknownext', startTime: item.startTime }, { organize: 'type', folders: {} }), 'Other');
+});
+
+check('proSubdir: by date and type+date', () => {
+  const item = { filename: '/Downloads/song.mp3', startTime: '2026-09-20T10:00:00.000Z' };
+  eq(lib.proSubdir(item, { organize: 'date', dateFormat: 'month', folders: {} }), '2026-09');
+  eq(lib.proSubdir(item, { organize: 'date', dateFormat: 'day', folders: {} }), '2026-09-20');
+  eq(
+    lib.proSubdir(item, { organize: 'type+date', dateFormat: 'month', folders: {} }),
+    'Audio/2026-09',
+  );
+  // date with no valid startTime falls back to type part only
+  eq(
+    lib.proSubdir({ filename: '/Downloads/song.mp3' }, { organize: 'type+date', dateFormat: 'month', folders: {} }),
+    'Audio',
+  );
+});
+
+check('proSubdir: user folder names are sanitized', () => {
+  const item = { filename: '/Downloads/x.jpg', startTime: '2026-09-20T10:00:00.000Z' };
+  eq(lib.proSubdir(item, { organize: 'type', folders: { image: '../evil' } }), 'evil');
 });
 
 /* ---------- report ---------- */

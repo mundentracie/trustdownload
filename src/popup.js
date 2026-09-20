@@ -6,17 +6,29 @@ import {
   bucketOf,
   categoryOf,
   dayKey,
+  DEFAULT_FOLDERS,
   fileNameOf,
   formatBytes,
   percentOf,
+  safeSegment,
 } from './lib.js';
+import { verifyLicense } from './license.js';
 
 const $ = (sel) => document.querySelector(sel);
 const listEl = $('#list');
 const emptyEl = $('#empty');
 const modalEl = $('#modal');
 
-const DEFAULTS = { theme: 'auto', filter: 'all', shelf: false };
+const DEFAULTS = {
+  theme: 'auto',
+  filter: 'all',
+  shelf: false,
+  pro: false,
+  licenseId: '',
+  organize: 'off',
+  dateFormat: 'month',
+  folders: {},
+};
 let prefs = { ...DEFAULTS };
 let items = [];
 let pendingConfirm = null; // { kind: 'erase-one', id } | { kind: 'erase-all' }
@@ -240,6 +252,102 @@ function render() {
   }
 }
 
+/* ---------- settings (TrustDownload Pro) ---------- */
+
+const FOLDER_LABELS = {
+  image: 'Images',
+  video: 'Video',
+  audio: 'Audio',
+  doc: 'Documents',
+  archive: 'Archives',
+  other: 'Other',
+};
+
+function showSettings(show) {
+  $('#settings').hidden = !show;
+  $('#filters').hidden = show;
+  listEl.hidden = show;
+  emptyEl.hidden = show ? true : items.length > 0;
+}
+
+function renderProBadge() {
+  const badge = $('#pro-badge');
+  badge.textContent = prefs.pro ? `Pro${prefs.licenseId ? ' · ' + prefs.licenseId : ''}` : 'Free';
+  badge.dataset.pro = String(!!prefs.pro);
+}
+
+function renderFolderInputs() {
+  const wrap = $('#folder-list');
+  wrap.textContent = '';
+  const folders = { ...DEFAULT_FOLDERS, ...(prefs.folders || {}) };
+  for (const key of Object.keys(FOLDER_LABELS)) {
+    const row = document.createElement('label');
+    row.className = 'td-set-row';
+    const label = document.createElement('span');
+    label.className = 'td-set-label';
+    label.textContent = FOLDER_LABELS[key];
+    const input = document.createElement('input');
+    input.className = 'td-input';
+    input.type = 'text';
+    input.dataset.folder = key;
+    input.value = safeSegment(folders[key]) || DEFAULT_FOLDERS[key];
+    input.maxLength = 60;
+    input.spellcheck = false;
+    row.appendChild(label);
+    row.appendChild(input);
+    wrap.appendChild(row);
+  }
+}
+
+function showProMsg(text, ok) {
+  const el = $('#pro-msg');
+  el.textContent = text;
+  el.hidden = !text;
+  el.dataset.ok = String(!!ok);
+}
+
+async function activateLicense() {
+  const input = $('#license-input');
+  const key = input.value.trim();
+  showProMsg('Verifying…', true);
+  const id = await verifyLicense(key);
+  if (!id) {
+    showProMsg('Invalid license key. Check for typos — verification is offline and exact.', false);
+    return;
+  }
+  prefs.pro = true;
+  prefs.licenseId = id;
+  await savePrefs();
+  renderProBadge();
+  renderFolderInputs();
+  showProMsg(`Pro activated (${id}). Auto-organize is now available.`, true);
+  syncSettingsControls();
+}
+
+function syncSettingsControls() {
+  $('#org-enabled').checked = prefs.pro && prefs.organize !== 'off';
+  $('#org-mode').value = prefs.organize === 'off' ? 'type' : prefs.organize;
+  $('#org-datefmt').value = prefs.dateFormat || 'month';
+  $('#row-datefmt').hidden = prefs.organize !== 'date' && prefs.organize !== 'type+date';
+  for (const el of document.querySelectorAll('#settings input, #settings select, #settings button')) {
+    if (el.id !== 'btn-back' && el.id !== 'btn-activate' && el.id !== 'license-input') {
+      el.disabled = !prefs.pro;
+    }
+  }
+}
+
+async function saveSettings() {
+  prefs.organize = $('#org-enabled').checked ? $('#org-mode').value : 'off';
+  prefs.dateFormat = $('#org-datefmt').value;
+  const folders = {};
+  for (const input of document.querySelectorAll('#folder-list .td-input')) {
+    folders[input.dataset.folder] = safeSegment(input.value) || DEFAULT_FOLDERS[input.dataset.folder];
+  }
+  prefs.folders = folders;
+  await savePrefs();
+  showProMsg('Rules saved. New downloads will use them.', true);
+}
+
 /* ---------- modal ---------- */
 
 function openModal(bodyText) {
@@ -288,6 +396,21 @@ $('#filters').addEventListener('click', async (e) => {
   render();
 });
 
+/* ---------- settings events ---------- */
+
+$('#btn-settings').addEventListener('click', () => {
+  renderProBadge();
+  renderFolderInputs();
+  syncSettingsControls();
+  showProMsg('', false);
+  showSettings(true);
+});
+$('#btn-back').addEventListener('click', () => showSettings(false));
+$('#btn-activate').addEventListener('click', activateLicense);
+$('#btn-save-settings').addEventListener('click', saveSettings);
+$('#org-mode').addEventListener('change', syncSettingsControls);
+$('#org-enabled').addEventListener('change', syncSettingsControls);
+
 // Live updates while the popup is open (event-driven; popup closes = listeners gone).
 chrome.downloads.onCreated.addListener(refresh);
 chrome.downloads.onChanged.addListener(refresh);
@@ -298,6 +421,9 @@ chrome.downloads.onErased.addListener(refresh);
 (async function init() {
   await loadPrefs();
   applyTheme();
+  renderProBadge();
+  renderFolderInputs();
+  syncSettingsControls();
   render();
   await refresh();
 })();

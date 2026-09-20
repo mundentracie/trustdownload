@@ -61,6 +61,16 @@ While the popup is being used **and real downloads are running**, the extension 
 - Dark mode that works (auto / light / dark, persisted)
 - Remembers your last filter choice
 
+## TrustDownload Pro — auto-organize (one-time purchase)
+
+The free version is the full download manager. **Pro** adds one thing: automatic folder organization for finished downloads.
+
+- Sort by **file type** (`Images/`, `Documents/`, …), **date** (`2026-09/`), or **both** (`Documents/2026-09/`)
+- Every folder name is editable; file names are never altered
+- Implemented via `chrome.downloads.onDeterminingFilename` — the destination is chosen as the download starts. Nothing is moved after the fact, nothing is scanned, nothing is uploaded.
+- **Offline licensing**: a Pro key is an ECDSA-P256 signature over the license id, verified locally with WebCrypto against a public key embedded in the source. No account, no server, no activation call — a paid feature that is provably unable to phone home.
+- Key generator: `node scripts/make-license.mjs secrets/private.jwk.json` (seller-side only)
+
 ## Not in scope (by design)
 
 No multi-threaded acceleration, no batch/sniffer scraping, no torrents, no video-site downloading. These are the features that force other managers to ask for 13–14 permissions. We would rather be boring and trustworthy.
@@ -89,6 +99,7 @@ See [PRIVACY.md](PRIVACY.md). Short version: nothing leaves your machine; settin
 ## Status
 
 - [x] v0.1.0 — MVP: list, pause/resume/cancel, clear all, filters, badge, dark mode
+- [x] v0.2.0 — Pro: auto-organize rules engine + offline license activation
 - [ ] Chrome Web Store review
 - [ ] "Save to last-used folder" preference
 - [ ] Export history to CSV
