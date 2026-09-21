@@ -3,3 +3,7 @@ dist/
 verify-report.txt
 test-results/
 playwright-report/
+
+# seller-side sales playbook — keep private (pricing, licensing commands, delivery SOP)
+SELLING.md
+secrets/
