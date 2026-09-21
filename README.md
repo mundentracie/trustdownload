@@ -65,6 +65,8 @@ While the popup is being used **and real downloads are running**, the extension 
 
 The free version is the full download manager. **Pro** adds one thing: automatic folder organization for finished downloads.
 
+**[Get a Pro license — $4.90 one-time, lifetime updates](https://www.paypal.com/ncp/payment/7384V6JAA5YJC)** (credit card, Apple Pay, or PayPal — no account required)
+
 - Sort by **file type** (`Images/`, `Documents/`, …), **date** (`2026-09/`), or **both** (`Documents/2026-09/`)
 - Every folder name is editable; file names are never altered
 - Implemented via `chrome.downloads.onDeterminingFilename` — the destination is chosen as the download starts. Nothing is moved after the fact, nothing is scanned, nothing is uploaded.
