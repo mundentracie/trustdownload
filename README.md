@@ -77,7 +77,9 @@ No multi-threaded acceleration, no batch/sniffer scraping, no torrents, no video
 
 ## Install
 
-Chrome Web Store: _coming soon (under review)_
+**Microsoft Edge:** [install from Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/odhegbkpcdhocjfcpomganlfmfbdblda) ✅ live
+
+Chrome Web Store: _under review_
 
 From source:
 
