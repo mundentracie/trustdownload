@@ -81,7 +81,7 @@ No multi-threaded acceleration, no batch/sniffer scraping, no torrents, no video
 
 **Microsoft Edge:** [install from Edge Add-ons](https://microsoftedge.microsoft.com/addons/detail/odhegbkpcdhocjfcpomganlfmfbdblda) ✅ live
 
-Chrome Web Store: _under review_
+**Google Chrome:** [install from Chrome Web Store](https://chromewebstore.google.com/detail/fiimdbcfdjdklefkbjepnndednngmnej) ✅ live
 
 From source:
 
@@ -104,7 +104,7 @@ See [PRIVACY.md](PRIVACY.md). Short version: nothing leaves your machine; settin
 
 - [x] v0.1.0 — MVP: list, pause/resume/cancel, clear all, filters, badge, dark mode
 - [x] v0.2.0 — Pro: auto-organize rules engine + offline license activation
-- [ ] Chrome Web Store review
+- [x] Chrome Web Store review — **approved, live**
 - [ ] "Save to last-used folder" preference
 - [ ] Export history to CSV
 
